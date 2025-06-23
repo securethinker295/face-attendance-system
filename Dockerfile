@@ -11,6 +11,7 @@ RUN apt-get update && apt-get install -y \
     libxrender-dev \
     libopenblas-dev \
     liblapack-dev \
+    git \
     && rm -rf /var/lib/apt/lists/*
 
 # Set environment variables
