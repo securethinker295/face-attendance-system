@@ -4,7 +4,7 @@ import base64
 from datetime import datetime
 import numpy as np
 from database import init_db, add_user, add_attendance
-from face_utils import save_face_encoding, recognize_face
+from face_utils import check_face_exists, save_face_encoding, recognize_face
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'uploads'
@@ -51,6 +51,12 @@ def api_register():
         temp_path = os.path.join(app.config['UPLOAD_FOLDER'], f'temp_{name}.jpg')
         with open(temp_path, 'wb') as f:
             f.write(image_bytes)
+
+        existing_name, error_message = check_face_exists(temp_path)
+        if existing_name:
+            os.remove(temp_path)  # Clean up temp file
+            return jsonify({'success': False, 'message': error_message})
+        
         
         # Process face encoding
         encoding = save_face_encoding(temp_path, name)

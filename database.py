@@ -4,13 +4,10 @@ from datetime import datetime
 
 DATABASE = 'attendance.db'
 
-
 def get_db_connection():
     conn = sqlite3.connect(DATABASE)
     conn.row_factory = sqlite3.Row
     return conn
-
-
 
 def init_db():
     conn = get_db_connection()
@@ -38,6 +35,12 @@ def init_db():
     conn.commit()
     conn.close()
 
+def check_name_exists(name):
+    """Check if a name already exists in the database"""
+    conn = get_db_connection()
+    user = conn.execute('SELECT name FROM users WHERE LOWER(name) = LOWER(?)', (name,)).fetchone()
+    conn.close()
+    return user is not None
 
 def add_user(name, face_encoding):
     conn = get_db_connection()
@@ -53,7 +56,6 @@ def add_user(name, face_encoding):
     finally:
         conn.close()
 
-
 def get_all_users():
     conn = get_db_connection()
     users = conn.execute('SELECT * FROM users').fetchall()
@@ -68,8 +70,6 @@ def get_all_users():
             'created_at': user['created_at']
         })
     return result
-
-
 
 def add_attendance(name, timestamp):
     conn = get_db_connection()
@@ -95,4 +95,3 @@ def get_all_attendance():
             'timestamp': record['timestamp']
         })
     return result
-

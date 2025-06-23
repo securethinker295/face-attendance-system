@@ -60,10 +60,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    document.getElementById('registerForm').addEventListener('submit', function(e) {
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
         e.preventDefault();
         
-        const name = document.getElementById('name').value;
+        const name = document.getElementById('name').value.trim();
         if (!name || !capturedImageData) {
             showMessage('Please enter name and capture image', 'error');
             return;
@@ -71,7 +71,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const registerBtn = document.getElementById('registerBtn');
         registerBtn.disabled = true;
-        registerBtn.textContent = 'Registering...';
+        registerBtn.textContent = 'Checking for duplicates...';
 
         fetch('/api/register', {
             method: 'POST',
@@ -89,7 +89,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 showMessage(data.message, 'success');
                 document.getElementById('registerForm').reset();
                 document.getElementById('preview').style.display = 'none';
+                document.getElementById('registerBtn').disabled = true;
                 capturedImageData = null;
+                
+                // Reset camera buttons
+                document.getElementById('startCamera').disabled = false;
+                document.getElementById('captureBtn').disabled = true;
             } else {
                 showMessage(data.message, 'error');
             }
@@ -103,6 +108,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
+    
     function showMessage(text, type) {
         const messageDiv = document.getElementById('message');
         messageDiv.textContent = text;
