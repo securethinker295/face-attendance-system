@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Face Recognition Attendance{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="hero-section">
+        <h1>Face Recognition Attendance System</h1>
+        <p>Simple and secure attendance tracking using facial recognition</p>
+    </div>
+
+    <div class="options-grid">
+        <div class="option-card">
+            <div class="card-icon">👤</div>
+            <h3>Register</h3>
+            <p>Add your face to the system for attendance tracking</p>
+            <a href="{{ url_for('register') }}" class="btn btn-primary">Register Now</a>
+        </div>
+
+        <div class="option-card">
+            <div class="card-icon">✅</div>
+            <h3>Punch In</h3>
+            <p>Mark your attendance by scanning your face</p>
+            <a href="{{ url_for('punch_in') }}" class="btn btn-success">Punch In</a>
+        </div>
+
+        <div class="option-card">
+            <div class="card-icon">📊</div>
+            <h3>Attendance Sheet</h3>
+            <p>View all attendance records and reports</p>
+            <a href="{{ url_for('sheet') }}" class="btn btn-info">View Sheet</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}Punch In - Face Recognition Attendance{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="form-container">
+        <h2>Punch In</h2>
+        <p>Position your face in the camera and click capture to mark attendance</p>
+        
+        <div class="camera-section">
+            <video id="video" autoplay muted></video>
+            <canvas id="canvas" style="display: none;"></canvas>
+            
+            <div class="camera-controls">
+                <button type="button" id="startCamera" class="btn btn-secondary">Start Camera</button>
+                <button type="button" id="punchInBtn" class="btn btn-success" disabled>Punch In</button>
+            </div>
+        </div>
+
+        <div id="result" class="result-section" style="display: none;">
+            <div class="result-card">
+                <h3 id="resultName"></h3>
+                <p id="resultTime"></p>
+                <p id="resultMessage"></p>
+            </div>
+        </div>
+
+        <div id="message" class="message"></div>
+        
+        <div class="form-actions">
+            <a href="{{ url_for('index') }}" class="btn btn-secondary">Back to Home</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const camera = new CameraHandler('video', 'canvas');
+
+    document.getElementById('startCamera').addEventListener('click', function() {
+        camera.startCamera();
+        this.disabled = true;
+        document.getElementById('punchInBtn').disabled = false;
+    });
+
+    document.getElementById('punchInBtn').addEventListener('click', function() {
+        const imageData = camera.captureImage();
+        if (!imageData) {
+            showMessage('Failed to capture image', 'error');
+            return;
+        }
+
+        const punchInBtn = this;
+        punchInBtn.disabled = true;
+        punchInBtn.textContent = 'Processing...';
+
+        fetch('/api/punch_in', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                image: imageData
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showResult(data.name, data.time, data.message, 'success');
+            } else {
+                showMessage(data.message, 'error');
+            }
+        })
+        .catch(error => {
+            showMessage('Error: ' + error.message, 'error');
+        })
+        .finally(() => {
+            punchInBtn.disabled = false;
+            punchInBtn.textContent = 'Punch In';
+        });
+    });
+
+    function showResult(name, time, message, type) {
+        document.getElementById('resultName').textContent = name;
+        document.getElementById('resultTime').textContent = 'Time: ' + time;
+        document.getElementById('resultMessage').textContent = message;
+        
+        const resultSection = document.getElementById('result');
+        resultSection.className = 'result-section ' + type;
+        resultSection.style.display = 'block';
+        
+        setTimeout(() => {
+            resultSection.style.display = 'none';
+        }, 5000);
+    }
+
+    function showMessage(text, type) {
+        const messageDiv = document.getElementById('message');
+        messageDiv.textContent = text;
+        messageDiv.className = 'message ' + type;
+        messageDiv.style.display = 'block';
+        
+        setTimeout(() => {
+            messageDiv.style.display = 'none';
+        }, 5000);
+    }
+});
+</script>
+{% endblock %}

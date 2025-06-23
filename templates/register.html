@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block title %}Register - Face Recognition Attendance{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="form-container">
+        <h2>Register New User</h2>
+        
+        <form id="registerForm">
+            <div class="form-group">
+                <label for="name">Full Name:</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+
+            <div class="camera-section">
+                <video id="video" autoplay muted></video>
+                <canvas id="canvas" style="display: none;"></canvas>
+                
+                <div class="camera-controls">
+                    <button type="button" id="startCamera" class="btn btn-secondary">Start Camera</button>
+                    <button type="button" id="captureBtn" class="btn btn-primary" disabled>Capture Photo</button>
+                </div>
+                
+                <div id="preview" style="display: none;">
+                    <h4>Captured Image:</h4>
+                    <img id="capturedImage" alt="Captured face">
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" id="registerBtn" class="btn btn-success" disabled>Register</button>
+                <a href="{{ url_for('index') }}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+
+        <div id="message" class="message"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const camera = new CameraHandler('video', 'canvas');
+    let capturedImageData = null;
+
+    document.getElementById('startCamera').addEventListener('click', function() {
+        camera.startCamera();
+        this.disabled = true;
+        document.getElementById('captureBtn').disabled = false;
+    });
+
+    document.getElementById('captureBtn').addEventListener('click', function() {
+        capturedImageData = camera.captureImage();
+        if (capturedImageData) {
+            document.getElementById('capturedImage').src = capturedImageData;
+            document.getElementById('preview').style.display = 'block';
+            document.getElementById('registerBtn').disabled = false;
+        }
+    });
+
+    document.getElementById('registerForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const name = document.getElementById('name').value;
+        if (!name || !capturedImageData) {
+            showMessage('Please enter name and capture image', 'error');
+            return;
+        }
+
+        const registerBtn = document.getElementById('registerBtn');
+        registerBtn.disabled = true;
+        registerBtn.textContent = 'Registering...';
+
+        fetch('/api/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                name: name,
+                image: capturedImageData
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showMessage(data.message, 'success');
+                document.getElementById('registerForm').reset();
+                document.getElementById('preview').style.display = 'none';
+                capturedImageData = null;
+            } else {
+                showMessage(data.message, 'error');
+            }
+        })
+        .catch(error => {
+            showMessage('Error: ' + error.message, 'error');
+        })
+        .finally(() => {
+            registerBtn.disabled = false;
+            registerBtn.textContent = 'Register';
+        });
+    });
+
+    function showMessage(text, type) {
+        const messageDiv = document.getElementById('message');
+        messageDiv.textContent = text;
+        messageDiv.className = 'message ' + type;
+        messageDiv.style.display = 'block';
+        
+        setTimeout(() => {
+            messageDiv.style.display = 'none';
+        }, 5000);
+    }
+});
+</script>
+{% endblock %}

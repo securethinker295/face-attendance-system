@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Attendance Sheet - Face Recognition Attendance{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="sheet-container">
+        <h2>Attendance Records</h2>
+        
+        {% if records %}
+        <div class="table-container">
+            <table class="attendance-table">
+                <thead>
+                    <tr>
+                        <th>S.No</th>
+                        <th>Name</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for record in records %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>{{ record.name }}</td>
+                        <td>{{ record.timestamp.split(' ')[0] }}</td>
+                        <td>{{ record.timestamp.split(' ')[1] }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="no-records">
+            <p>No attendance records found.</p>
+            <a href="{{ url_for('punch_in') }}" class="btn btn-primary">Mark Attendance</a>
+        </div>
+        {% endif %}
+        
+        <div class="form-actions">
+            <a href="{{ url_for('index') }}" class="btn btn-secondary">Back to Home</a>
+            <button onclick="window.print()" class="btn btn-info">Print Sheet</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
