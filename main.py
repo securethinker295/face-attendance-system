@@ -1,9 +1,9 @@
-from flask import Flask, render_template, request, jsonify, redirect, url_for
+from flask import Flask, render_template, request, jsonify
 import os
 import base64
 from datetime import datetime
 import numpy as np
-from database import init_db, add_user, get_all_users, add_attendance
+from database import init_db, add_user, add_attendance
 from face_utils import save_face_encoding, recognize_face
 
 app = Flask(__name__)
