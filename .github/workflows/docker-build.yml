@@ -23,7 +23,7 @@ jobs:
       - name: Build Docker image
         uses: docker/build-push-action@v5
         with:
-          context: ./attendance_portal
-          file: ./attendance_portal/Dockerfile
+          context: .
+          file: ./Dockerfile
           push: false
           tags: ghcr.io/${{ github.repository }}:latest
